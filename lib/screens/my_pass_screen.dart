@@ -1,0 +1,392 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/pass.dart';
+import '../providers/auth_provider.dart';
+import '../services/api_service.dart';
+
+class MyPassScreen extends StatefulWidget {
+  const MyPassScreen({Key? key}) : super(key: key);
+
+  @override
+  State<MyPassScreen> createState() => _MyPassScreenState();
+}
+
+class _MyPassScreenState extends State<MyPassScreen> {
+  Pass? _pass;
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMyPass();
+  }
+
+  Future<void> _loadMyPass() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final apiService = ApiService();
+      
+      final pass = await apiService.getMyPass(authProvider.user!.token);
+      
+      if (mounted) {
+        setState(() {
+          _pass = pass;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceAll('ApiException: ', '');
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Pass'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadMyPass,
+          ),
+        ],
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? _buildErrorView()
+              : _pass == null
+                  ? _buildNoPassView()
+                  : _buildPassView(),
+    );
+  }
+
+  Widget _buildErrorView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(
+              _errorMessage ?? 'An error occurred',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _loadMyPass,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoPassView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.card_membership_outlined, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              'No Active Pass',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'You don\'t have an active pass yet.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/apply-pass');
+              },
+              child: const Text('Apply for Pass'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPassView() {
+    final statusColor = _getStatusColor(_pass!.status);
+    final statusIcon = _getStatusIcon(_pass!.status);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Pass Status Card
+          Card(
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Icon(statusIcon, color: statusColor, size: 32),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Pass Status',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          _pass!.status.displayName,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: statusColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (_pass!.isActive)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'ACTIVE',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Pass Details Card
+          Card(
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Pass Details',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildDetailRow('Pass Type', _pass!.passType.displayName),
+                  const Divider(),
+                  _buildDetailRow('Duration', _pass!.duration.displayName),
+                  if (_pass!.validFrom != null) ...[
+                    const Divider(),
+                    _buildDetailRow('Valid From', _formatDate(_pass!.validFrom!)),
+                  ],
+                  if (_pass!.validTill != null) ...[
+                    const Divider(),
+                    _buildDetailRow('Valid Till', _formatDate(_pass!.validTill!)),
+                  ],
+                  const Divider(),
+                  _buildDetailRow('Applied On', _formatDate(_pass!.createdAt)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Pass ID Card
+          Card(
+            elevation: 4,
+            color: Colors.blue.shade50,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Pass Information',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildDetailRow('Pass ID', _pass!.id),
+                  const Divider(),
+                  _buildDetailRow('User ID', _pass!.userId),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Status-specific actions
+          if (_pass!.status == PassStatus.PENDING)
+            Card(
+              elevation: 4,
+              color: Colors.orange.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.pending, color: Colors.orange.shade700),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Application Pending',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Your pass application is under review. You will be notified once it is approved or rejected.',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (_pass!.status == PassStatus.REJECTED)
+            Card(
+              elevation: 4,
+              color: Colors.red.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.cancel, color: Colors.red.shade700),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Application Rejected',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Your pass application was rejected. You can apply again by uploading the required documents.',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/apply-pass');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade700,
+                      ),
+                      child: const Text('Apply Again'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getStatusColor(PassStatus status) {
+    switch (status) {
+      case PassStatus.PENDING:
+        return Colors.orange;
+      case PassStatus.APPROVED:
+        return Colors.green;
+      case PassStatus.REJECTED:
+        return Colors.red;
+    }
+  }
+
+  IconData _getStatusIcon(PassStatus status) {
+    switch (status) {
+      case PassStatus.PENDING:
+        return Icons.pending;
+      case PassStatus.APPROVED:
+        return Icons.check_circle;
+      case PassStatus.REJECTED:
+        return Icons.cancel;
+    }
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return dateString;
+    }
+  }
+}
