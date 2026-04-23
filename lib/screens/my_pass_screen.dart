@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/pass.dart';
+import '../models/document.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
+import '../widgets/document_viewer.dart';
+import 'document_upload_screen.dart';
 
 class MyPassScreen extends StatefulWidget {
   const MyPassScreen({Key? key}) : super(key: key);
@@ -13,6 +16,7 @@ class MyPassScreen extends StatefulWidget {
 
 class _MyPassScreenState extends State<MyPassScreen> {
   Pass? _pass;
+  Document? _document;
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -34,9 +38,19 @@ class _MyPassScreenState extends State<MyPassScreen> {
       
       final pass = await apiService.getMyPass(authProvider.user!.token);
       
+      Document? doc;
+      if (pass != null) {
+        try {
+          doc = await apiService.getDocumentMetadataByPassId(authProvider.user!.token, pass.id);
+        } catch (e) {
+          doc = null; // No document for this pass
+        }
+      }
+      
       if (mounted) {
         setState(() {
           _pass = pass;
+          _document = doc;
           _isLoading = false;
         });
       }
@@ -253,6 +267,64 @@ class _MyPassScreenState extends State<MyPassScreen> {
             ),
           ),
           const SizedBox(height: 24),
+
+          // Document Section
+          if (_document != null)
+            DocumentViewer(
+              token: Provider.of<AuthProvider>(context, listen: false).user!.token,
+              document: _document!,
+            ),
+          if (_document != null) const SizedBox(height: 24),
+          
+          if (_document == null && _pass != null)
+            Card(
+              elevation: 4,
+              color: Colors.orange.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.warning, color: Colors.orange.shade700),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Photo Required',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Please upload a photo of your ${DocumentType.fromPassType(_pass!.passType).displayName} to complete your pass application.',
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DocumentUploadScreen(pass: _pass!),
+                          ),
+                        ).then((_) => _loadMyPass()); // Refresh after upload
+                      },
+                      icon: const Icon(Icons.add_a_photo),
+                      label: const Text('Upload Photo'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (_document == null && _pass != null) const SizedBox(height: 24),
 
           // Status-specific actions
           if (_pass!.status == PassStatus.PENDING)

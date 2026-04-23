@@ -160,17 +160,6 @@ class DashboardScreen extends StatelessWidget {
               );
             },
           ),
-          _buildActionCard(
-            context,
-            'Upload Documents',
-            Icons.upload_file,
-            Colors.purple,
-            () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Document upload coming soon')),
-              );
-            },
-          ),
         ]);
         break;
       case Role.ADMIN:

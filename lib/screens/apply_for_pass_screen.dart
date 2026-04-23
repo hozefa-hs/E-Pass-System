@@ -4,6 +4,7 @@ import '../models/pass.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../widgets/loading_button.dart';
+import 'document_upload_screen.dart';
 
 class ApplyForPassScreen extends StatefulWidget {
   const ApplyForPassScreen({Key? key}) : super(key: key);
@@ -40,16 +41,24 @@ class _ApplyForPassScreenState extends State<ApplyForPassScreen> {
         duration: _selectedDuration!,
       );
 
-      await apiService.applyForPass(authProvider.user!.token, request);
+      // Apply for pass
+      final pass = await apiService.applyForPass(authProvider.user!.token, request);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Pass application submitted successfully!'),
+            content: Text('Pass application submitted! Please upload required photo.'),
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context);
+        
+        // Auto-redirect to document upload screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DocumentUploadScreen(pass: pass),
+          ),
+        );
       }
     } catch (e) {
       setState(() {
@@ -101,7 +110,18 @@ class _ApplyForPassScreenState extends State<ApplyForPassScreen> {
                   color: Colors.grey,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 8),
+              
+              const Text(
+                'Photo will be required on the next screen',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.orange,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 24),
 
               // Pass Type Selection
               const Text(
@@ -191,14 +211,14 @@ class _ApplyForPassScreenState extends State<ApplyForPassScreen> {
               Card(
                 color: Colors.blue.shade50,
                 child: Padding(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
                           Icon(Icons.info_outline, color: Colors.blue, size: 20),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
                             'Important Information',
                             style: TextStyle(
@@ -208,14 +228,15 @@ class _ApplyForPassScreenState extends State<ApplyForPassScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
-                        '• One active pass per user\n'
-                        '• Student Pass: 40% discount (College ID required)\n'
-                        '• Senior Citizen: Free travel (DOB proof required)\n'
-                        '• Corporate Pass: Fixed price (Company letter required)\n'
-                        '• Documents need to be uploaded separately',
-                        style: TextStyle(fontSize: 13),
+                        '· One active pass per user\n'
+                        '· Student Pass: 40% discount (College ID required)\n'
+                        '· Senior Citizen: Free travel (Age proof required)\n'
+                        '· Corporate Pass: Fixed price (Company letter required)\n'
+                        '· Photo upload required on next screen\n'
+                        '· Photo must be PNG, JPG, or JPEG (max 5MB)',
+                        style: const TextStyle(fontSize: 13),
                       ),
                     ],
                   ),

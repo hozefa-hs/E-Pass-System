@@ -38,17 +38,19 @@ dependencies:
   # HTTP package for API calls
   http: ^1.2.1
   
+  # HTTP parser for multipart requests
+  http_parser: ^4.0.2
+  
   # Provider for state management
   provider: ^6.1.2
   
   # Shared preferences for storing JWT token
   shared_preferences: ^2.2.3
   
-  # File picker for document upload
-  file_picker: ^8.0.3
-  
-  # Image picker for photo/document capture
+  # Image picker for photo upload
   image_picker: ^1.1.2
+
+  path_provider: ^2.0.8
 
 dev_dependencies:
   flutter_test:

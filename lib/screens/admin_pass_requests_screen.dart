@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/pass.dart';
+import '../models/document.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
+import '../widgets/document_viewer.dart';
 
 class AdminPassRequestsScreen extends StatefulWidget {
   const AdminPassRequestsScreen({Key? key}) : super(key: key);
@@ -13,6 +15,7 @@ class AdminPassRequestsScreen extends StatefulWidget {
 
 class _AdminPassRequestsScreenState extends State<AdminPassRequestsScreen> {
   List<Pass> _pendingPasses = [];
+  Map<String, Document?> _documents = {};
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -34,9 +37,21 @@ class _AdminPassRequestsScreenState extends State<AdminPassRequestsScreen> {
       
       final passes = await apiService.getPendingPasses(authProvider.user!.token);
       
+      // Load documents for each pass
+      Map<String, Document?> docs = {};
+      for (final pass in passes) {
+        try {
+          final doc = await apiService.getDocumentMetadataByPassId(authProvider.user!.token, pass.id);
+          docs[pass.id] = doc;
+        } catch (e) {
+          docs[pass.id] = null; // No document for this pass
+        }
+      }
+      
       if (mounted) {
         setState(() {
           _pendingPasses = passes;
+          _documents = docs;
           _isLoading = false;
         });
       }
@@ -194,6 +209,9 @@ class _AdminPassRequestsScreenState extends State<AdminPassRequestsScreen> {
   }
 
   Widget _buildPassCard(Pass pass) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final document = _documents[pass.id];
+
     return Card(
       elevation: 4,
       margin: const EdgeInsets.only(bottom: 16),
@@ -235,6 +253,34 @@ class _AdminPassRequestsScreenState extends State<AdminPassRequestsScreen> {
             _buildDetailRow('Pass Type', pass.passType.displayName),
             _buildDetailRow('Duration', pass.duration.displayName),
             _buildDetailRow('Applied On', _formatDate(pass.createdAt)),
+            const SizedBox(height: 16),
+            
+            // Document Viewer
+            if (document != null)
+              DocumentViewer(
+                token: authProvider.user!.token,
+                document: document,
+              )
+            else
+              Card(
+                color: Colors.orange.shade50,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning, color: Colors.orange.shade700),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'No document uploaded',
+                          style: TextStyle(color: Colors.orange.shade700),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            
             const SizedBox(height: 16),
             Row(
               children: [

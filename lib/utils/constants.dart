@@ -1,6 +1,7 @@
 class ApiConstants {
-  static const String baseUrl = 'http://localhost:8080';
+  // static const String baseUrl = 'http://localhost:8080';
   // static const String baseUrl = 'http://10.0.2.2:8080';
+  static const String baseUrl = 'https://thawing-savannah-05781-d4efd14a24f0.herokuapp.com';
   static const String authPath = '/api/auth';
 
   
