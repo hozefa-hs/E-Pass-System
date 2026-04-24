@@ -7,6 +7,7 @@ import '../utils/constants.dart';
 import '../models/user.dart';
 import '../models/pass.dart';
 import '../models/document.dart';
+import '../models/validation_result.dart';
 
 class ApiService {
   final http.Client client;
@@ -373,9 +374,29 @@ class ApiService {
       if (response.statusCode == 200) {
         return response.bodyBytes;
       } else {
+        throw ApiException('Failed to download document', response.statusCode);
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Network error occurred', 0);
+    }
+  }
+
+  // Ticket Checker API methods
+  Future<ValidationResult> validatePass(String token, String passId) async {
+    try {
+      final response = await get(
+        '/api/ticket-checker/validate/$passId',
+        token: token,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return ValidationResult.fromJson(responseData);
+      } else {
         final errorData = jsonDecode(response.body);
         throw ApiException(
-          errorData['message'] ?? 'Failed to download document',
+          errorData['message'] ?? 'Failed to validate pass',
           response.statusCode,
         );
       }

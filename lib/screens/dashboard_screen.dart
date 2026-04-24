@@ -5,6 +5,7 @@ import '../models/user.dart';
 import 'apply_for_pass_screen.dart';
 import 'my_pass_screen.dart';
 import 'admin_pass_requests_screen.dart';
+import 'ticket_checker_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -196,12 +197,14 @@ class DashboardScreen extends StatelessWidget {
         cards.add(_buildActionCard(
           context,
           'Validate Pass',
-          Icons.qr_code_scanner,
+          Icons.confirmation_number,
           Colors.indigo,
           () {
-            // TODO: Navigate to pass validation screen
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Pass validation coming soon')),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const TicketCheckerScreen(),
+              ),
             );
           },
         ));
