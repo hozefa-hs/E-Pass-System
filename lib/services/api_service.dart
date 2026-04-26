@@ -9,6 +9,7 @@ import '../models/pass.dart';
 import '../models/document.dart';
 import '../models/validation_result.dart';
 import '../models/admin_user.dart';
+import '../models/profile_data.dart';
 
 class ApiService {
   final http.Client client;
@@ -480,6 +481,26 @@ class ApiService {
 
       if (response.statusCode != 204) {
         throw ApiException('Failed to delete user', response.statusCode);
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Network error occurred', 0);
+    }
+  }
+
+  // Profile API methods
+  Future<ProfileData> getUserProfile(String token) async {
+    try {
+      final response = await get(
+        '/api/profile',
+        token: token,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return ProfileData.fromJson(responseData);
+      } else {
+        throw ApiException('Failed to get profile', response.statusCode);
       }
     } catch (e) {
       if (e is ApiException) rethrow;
