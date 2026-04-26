@@ -8,6 +8,7 @@ import '../models/user.dart';
 import '../models/pass.dart';
 import '../models/document.dart';
 import '../models/validation_result.dart';
+import '../models/admin_user.dart';
 
 class ApiService {
   final http.Client client;
@@ -51,6 +52,34 @@ class ApiService {
     final url = Uri.parse('${ApiConstants.baseUrl}$endpoint');
     
     return await client.get(
+      url,
+      headers: headers,
+    );
+  }
+
+  Future<http.Response> put(
+    String endpoint,
+    Map<String, dynamic> body, {
+    String? token,
+  }) async {
+    final headers = await getHeaders(token: token);
+    final url = Uri.parse('${ApiConstants.baseUrl}$endpoint');
+    
+    return await client.put(
+      url,
+      headers: headers,
+      body: jsonEncode(body),
+    );
+  }
+
+  Future<http.Response> delete(
+    String endpoint, {
+    String? token,
+  }) async {
+    final headers = await getHeaders(token: token);
+    final url = Uri.parse('${ApiConstants.baseUrl}$endpoint');
+    
+    return await client.delete(
       url,
       headers: headers,
     );
@@ -375,6 +404,82 @@ class ApiService {
         return response.bodyBytes;
       } else {
         throw ApiException('Failed to download document', response.statusCode);
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Network error occurred', 0);
+    }
+  }
+
+  // Admin User Management API methods
+  Future<List<AdminUser>> getAllUsers(String token) async {
+    try {
+      final response = await get(
+        '/api/admin/users',
+        token: token,
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = jsonDecode(response.body);
+        return responseData.map((user) => AdminUser.fromJson(user)).toList();
+      } else {
+        throw ApiException('Failed to get users', response.statusCode);
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Network error occurred', 0);
+    }
+  }
+
+  Future<AdminUser> updateUserRole(String token, String userId, String newRole) async {
+    try {
+      final response = await put(
+        '/api/admin/users/$userId/role',
+        {'newRole': newRole},
+        token: token,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return AdminUser.fromJson(responseData);
+      } else {
+        throw ApiException('Failed to update user role', response.statusCode);
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Network error occurred', 0);
+    }
+  }
+
+  Future<AdminUser> updateUserStatus(String token, String userId, bool isActive) async {
+    try {
+      final response = await put(
+        '/api/admin/users/$userId/status',
+        {'isActive': isActive},
+        token: token,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return AdminUser.fromJson(responseData);
+      } else {
+        throw ApiException('Failed to update user status', response.statusCode);
+      }
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Network error occurred', 0);
+    }
+  }
+
+  Future<void> deleteUser(String token, String userId) async {
+    try {
+      final response = await delete(
+        '/api/admin/users/$userId',
+        token: token,
+      );
+
+      if (response.statusCode != 204) {
+        throw ApiException('Failed to delete user', response.statusCode);
       }
     } catch (e) {
       if (e is ApiException) rethrow;

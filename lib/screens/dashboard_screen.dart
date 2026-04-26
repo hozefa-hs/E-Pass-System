@@ -6,6 +6,7 @@ import 'apply_for_pass_screen.dart';
 import 'my_pass_screen.dart';
 import 'admin_pass_requests_screen.dart';
 import 'ticket_checker_screen.dart';
+import 'manage_users_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({Key? key}) : super(key: key);
@@ -181,13 +182,15 @@ class DashboardScreen extends StatelessWidget {
           ),
           _buildActionCard(
             context,
-            'View Users',
+            'Manage Users',
             Icons.people,
             Colors.teal,
             () {
-              // TODO: Navigate to users screen
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Users screen coming soon')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ManageUsersScreen(),
+                ),
               );
             },
           ),
