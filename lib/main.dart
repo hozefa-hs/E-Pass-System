@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
+import 'screens/welcome_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'utils/constants.dart';
@@ -37,7 +38,12 @@ class EPassSystemApp extends StatelessWidget {
             ),
           ),
         ),
-        home: const AuthWrapper(),
+        initialRoute: AppConstants.welcomeRoute,
+        routes: {
+          AppConstants.welcomeRoute: (context) => const WelcomeScreen(),
+          AppConstants.authRoute: (context) => const AuthWrapper(),
+          AppConstants.dashboardRoute: (context) => const DashboardScreen(),
+        },
         debugShowCheckedModeBanner: false,
       ),
     );

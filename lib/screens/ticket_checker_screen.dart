@@ -93,128 +93,222 @@ class _TicketCheckerScreenState extends State<TicketCheckerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ticket Checker'),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF667EEA),
+              Color(0xFF764BA2),
+            ],
+          ),
+        ),
+        child: SafeArea(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
-              const Card(
-                elevation: 4,
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.confirmation_number,
-                              color: Colors.blue, size: 24),
-                          SizedBox(width: 8),
-                          Text(
-                            'Pass Validation',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+              // Modern AppBar
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const Text(
+                      'Ticket Checker',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      SizedBox(height: 8),
-                      Text(
-                        'Enter pass ID to validate passenger travel eligibility',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24),
 
-              // Input Section
-              Card(
-                elevation: 4,
-                child: Padding(
+              Expanded(
+                child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Pass ID',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _passIdController,
-                        decoration: const InputDecoration(
-                          hintText: 'Enter pass ID',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.badge),
-                        ),
-                        enabled: !_isLoading,
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: LoadingButton(
-                              text: 'Validate pass',
-                              onPressed: _validatePass,
-                              isLoading: _isLoading,
+                      // Header
+                      Container(
+                        padding: const EdgeInsets.all(20.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
                             ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    Icons.confirmation_number,
+                                    color: Colors.blue.shade700,
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  'Pass Validation',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Enter pass ID to validate passenger travel eligibility',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Input Section
+                      Container(
+                        padding: const EdgeInsets.all(20.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Pass ID',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _passIdController,
+                              decoration: InputDecoration(
+                                hintText: 'Enter pass ID',
+                                hintStyle: TextStyle(color: Colors.grey.shade400),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(color: Colors.grey.shade300),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF667EEA)),
+                                ),
+                                prefixIcon: Icon(Icons.badge, color: Colors.grey.shade600),
+                              ),
+                              enabled: !_isLoading,
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: LoadingButton(
+                                    text: 'Validate pass',
+                                    onPressed: _validatePass,
+                                    isLoading: _isLoading,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                if (_validationResult != null)
+                                  IconButton(
+                                    onPressed: _resetValidation,
+                                    icon: const Icon(Icons.refresh),
+                                    tooltip: 'New Validation',
+                                    color: Colors.grey.shade600,
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Error Message
+                      if (_errorMessage != null)
+                        Container(
+                          padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 20,
+                                offset: const Offset(0, 10),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          if (_validationResult != null)
-                            IconButton(
-                              onPressed: _resetValidation,
-                              icon: const Icon(Icons.refresh),
-                              tooltip: 'New Validation',
-                            ),
-                        ],
-                      ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(Icons.error, color: Colors.red.shade700, size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  _errorMessage!,
+                                  style: TextStyle(
+                                    color: Colors.red.shade700,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // Validation Result
+                      if (_validationResult != null) ...[
+                        const SizedBox(height: 24),
+                        _buildValidationResult(),
+                      ],
+                      const SizedBox(height: 20), // Bottom padding
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // Error Message
-              if (_errorMessage != null)
-                Container(
-                  padding: const EdgeInsets.all(12.0),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.error, color: Colors.red.shade600),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _errorMessage!,
-                          style: TextStyle(color: Colors.red.shade600),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              // Validation Result
-              if (_validationResult != null) ...[
-                const SizedBox(height: 24),
-                _buildValidationResult(),
-              ],
-              const SizedBox(height: 20), // Bottom padding
             ],
           ),
         ),
@@ -226,27 +320,36 @@ class _TicketCheckerScreenState extends State<TicketCheckerScreen> {
     final result = _validationResult!;
     final color = _getResultColor();
 
-    return Card(
-      elevation: 8,
-      color: color.shade50,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
             // Status Icon and Title
             Container(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(20.0),
               decoration: BoxDecoration(
-                color: color.shade100,
+                color: color.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 _getResultIcon(),
                 color: color.shade700,
-                size: 48,
+                size: 56,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Title and Subtitle
             Text(
@@ -258,7 +361,7 @@ class _TicketCheckerScreenState extends State<TicketCheckerScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               result.displaySubtitle,
               style: TextStyle(
@@ -267,33 +370,42 @@ class _TicketCheckerScreenState extends State<TicketCheckerScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
             // Pass Details
             if (result.passType != null && result.passDuration != null) ...[
-              const Divider(),
-              const SizedBox(height: 12),
-              _buildDetailRow('Pass Type', result.passType!.displayName),
-              const SizedBox(height: 8),
-              _buildDetailRow('Duration', result.passDuration!.displayName),
-              if (result.status != null) ...[
-                const SizedBox(height: 8),
-                _buildDetailRow('Status', result.status!.displayName),
-              ],
-              const SizedBox(height: 8),
-              _buildDetailRow('Pass ID', result.passId),
-              const SizedBox(height: 8),
-              _buildDetailRow('Validated At', result.validatedAt),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    _buildDetailRow('Pass Type', result.passType!.displayName),
+                    const SizedBox(height: 8),
+                    _buildDetailRow('Duration', result.passDuration!.displayName),
+                    if (result.status != null) ...[
+                      const SizedBox(height: 8),
+                      _buildDetailRow('Status', result.status!.displayName),
+                    ],
+                    const SizedBox(height: 8),
+                    _buildDetailRow('Pass ID', result.passId),
+                    const SizedBox(height: 8),
+                    _buildDetailRow('Validated At', result.validatedAt),
+                  ],
+                ),
+              ),
             ],
 
             // Message
             if (result.message.isNotEmpty) ...[
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: color.shade100,
-                  borderRadius: BorderRadius.circular(8),
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   result.message,
