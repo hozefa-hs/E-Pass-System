@@ -45,17 +45,17 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> register(String email, String password, Role role) async {
+  Future<bool> register(String email, String password, Role role) async {
     _setLoading(true);
     _clearError();
 
     try {
-      final user = await _apiService.register(email, password, role);
-      await _saveUser(user);
-      _user = user;
-      notifyListeners();
+      await _apiService.register(email, password, role);
+      // Don't auto-login after registration - user must login explicitly
+      return true;
     } catch (e) {
       _setError(e.toString());
+      return false;
     } finally {
       _setLoading(false);
     }

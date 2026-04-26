@@ -1,3 +1,4 @@
+import 'package:e_pass_system/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/user.dart';
@@ -30,11 +31,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      await authProvider.register(
+      final success = await authProvider.register(
         _emailController.text.trim(),
         _passwordController.text,
         _selectedRole,
       );
+
+      if (success && mounted) {
+        // Show success dialog
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            icon: const Icon(Icons.check_circle, color: Colors.green, size: 48),
+            title: const Text('Registration Successful'),
+            content: const Text(
+                'Your account has been created successfully. Please login to continue.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                  Navigator.of(context).pop(); // Go back to login screen
+                },
+                child: const Text('Go to Login'),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 
@@ -61,7 +85,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     color: Colors.blue,
                   ),
                   const SizedBox(height: 32),
-                  
                   const Text(
                     'Create Account',
                     textAlign: TextAlign.center,
@@ -72,7 +95,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
                   const Text(
                     'Register for a new account',
                     textAlign: TextAlign.center,
@@ -82,7 +104,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-
                   CustomTextField(
                     labelText: 'Email',
                     hintText: 'Enter your email',
@@ -93,14 +114,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
                       }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                          .hasMatch(value)) {
                         return 'Please enter a valid email';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-
                   CustomTextField(
                     labelText: 'Password',
                     hintText: 'Enter your password',
@@ -118,7 +139,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-
                   CustomTextField(
                     labelText: 'Confirm Password',
                     hintText: 'Confirm your password',
@@ -136,7 +156,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-
                   DropdownButtonFormField<Role>(
                     value: _selectedRole,
                     decoration: InputDecoration(
@@ -151,7 +170,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                        borderSide:
+                            BorderSide(color: Theme.of(context).primaryColor),
                       ),
                     ),
                     items: Role.values.map((role) {
@@ -172,7 +192,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                   ),
                   const SizedBox(height: 24),
-
                   if (authProvider.error != null)
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -183,7 +202,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.error, color: Colors.red.shade600, size: 20),
+                          Icon(Icons.error,
+                              color: Colors.red.shade600, size: 20),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -195,14 +215,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                   const SizedBox(height: 16),
-
                   LoadingButton(
                     text: 'Register',
                     onPressed: _register,
                     isLoading: authProvider.isLoading,
                   ),
                   const SizedBox(height: 16),
-
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
